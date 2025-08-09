@@ -1,0 +1,35 @@
+@startuml
+!include https://raw.githubusercontent.com/plantuml-stdlib/C4-PlantUML/master/C4_Context.puml
+
+title Контекст внедрения сервисов "Умный дом" для PropDevelopment
+
+Person(tenant, "Собственник", "Владелец квартиры в ЖК, использует мобильное приложение")
+Person(guest, "Гость", "Посетитель, вызывает через домофон")
+Person(driver, "Водитель", "Владелец автомобиля, въезжает через шлагбаум")
+
+
+System_Boundary(prop, "PropDevelopment") {
+    System(tenant_app, "Мобильное приложение собственников", "Существующее приложение для управления ЖКУ")
+    System(api_gw, "API Gateway", "Централизованный шлюз для интеграций")
+    
+    System(smart_home_svc, "Умные сервисы", "Новые сервисы: домофон и шлагбаум")
+    System(tenant_core, "Tenant Core App", "Бэкенд-сервис для собственников (ЖКУ)")
+    System(crm, "CRM", "Система управления данными собственников")
+    
+}
+
+System_Ext(ns, "Домофон и шлагбаум")
+
+Rel(tenant, tenant_app, "Управляет доступом, настраивает параметры", "HTTPS")
+Rel(api_gw, tenant_core, "API Бэкенда", "HTTPS")
+
+Rel(guest, ns, "Вызывает через домофон", "Видео/аудио")
+Rel(driver, ns, "Въезжает через шлагбаум", "Распознавание номера")
+Rel(smart_home_svc, ns, "Управление", "Распознавание номера")
+
+Rel(tenant_app, api_gw, "Запросы управления/статуса", "HTTPS/JWT")
+
+Rel(api_gw, smart_home_svc, "Запросы управления/статуса", "HTTPS/JWT")
+Rel(smart_home_svc, crm, "Проверка прав доступа, синхронизация данных", "HTTPS/OpenID Connect")
+
+@enduml
